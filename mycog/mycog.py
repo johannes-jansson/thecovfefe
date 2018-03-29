@@ -1,4 +1,5 @@
 import discord
+import random
 from discord.ext import commands
 
 class Mycog:
@@ -25,6 +26,12 @@ class Mycog:
     @commands.command()
     async def list_players(self):
         await self.bot.say(self.settings["Players"])
+
+    @commands.command()
+    async def select_random_player(self):
+        players = list(self.settings["Players"].keys())
+        player = random.choice(players)
+        await self.bot.say(self.settings["Players"][player]["Mention"])
 
 
 def setup(bot):
