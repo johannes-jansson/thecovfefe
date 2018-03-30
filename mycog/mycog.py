@@ -92,6 +92,10 @@ class Mycog:
 
     async def _request_vote(self, ctx, user):
         await self.bot.send_message(user, "Suggested team is ---. Yes or no? (y/n)")
+        channel = await self.bot.start_private_message(user)
+        r = (await self.bot.wait_for_message(channel=channel,author=user))
+        print(r.content)
+        await self.bot.say(r.content)
 
 
     @commands.command(pass_context=True)
