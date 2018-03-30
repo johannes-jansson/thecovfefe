@@ -2,18 +2,17 @@ import discord
 import random
 from discord.ext import commands
 
-spies = {}
-spies["5"] = 2
-spies["6"] = 2
-spies["7"] = 3
-spies["8"] = 3
-spies["9"] = 3
-spies["10"] = 4
+spies = {
+    "5": 2,
+    "6": 2,
+    "7": 3,
+    "8": 3,
+    "9": 3,
+    "10": 4
+}
 twofails = [7, 8, 9, 10]
 
 class Mycog:
-    """My custom cog that does stuff!"""
-
     def __init__(self, bot):
         self.bot = bot
         self.settings = {}
@@ -29,22 +28,9 @@ class Mycog:
             "217291426155855882", # Frulck
             "426671139851468810"  # Erik
         ]
-
         for id in ids:
             self._add_player(server.get_member(id))
         await self.bot.say("initialized")
-        # member_object = server.get_member("281455618559049730") # Davv_d
-        # self._add_player(member_object)
-        # member_object = server.get_member("312534277524946945") # Janzon
-        # self._add_player(member_object)
-        # member_object = server.get_member("426671139851468810") # Erik
-        # self._add_player(member_object)
-        # member_object = server.get_member("217291426155855882") # Frulck
-        # self._add_player(member_object)
-
-    @commands.command()
-    async def mycom(self):
-        await self.bot.say("I can do stuff!")
 
     @commands.command()
     async def add_player(self, user : discord.Member):
@@ -65,9 +51,13 @@ class Mycog:
 
     @commands.command()
     async def select_random_player(self):
+        player = self._select_random_player()
+        await self.bot.say(self.settings["Players"][player]["Mention"])
+
+    def _select_random_player(self):
         players = list(self.settings["Players"].keys())
         player = random.choice(players)
-        await self.bot.say(self.settings["Players"][player]["Mention"])
+        return player
 
 
 def setup(bot):
