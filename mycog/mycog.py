@@ -60,8 +60,11 @@ class Mycog:
     async def list_spies(self):
         await self.bot.say(self.settings["Spies"])
 
-    @commands.command()
-    async def select_spies(self):
+    @commands.command(pass_context=True)
+    async def select_spies(self, ctx):
+        server = ctx.message.server
+        user = ctx.message.author
+
         print("Started select_spies")
         spies = []
         innocents = self.settings["Players"].copy()
@@ -72,11 +75,12 @@ class Mycog:
         for i in range(nbrOfSpies):
             spy = random.choice(list(innocents.keys()))
             innocents.pop(spy)
-            spies.append(spy)
+            spies.append(server.get_member(spy))
         self.settings["Innocents"] = innocents
-        print("spies:")
-        print(spies)
-        await self.bot.say(spies)
+        for spy in spies:
+            self.settings["Spies"][spy.id] = {"Name": spy.name,
+                                              "Mention": spy.mention}
+        await self.bot.say("The spies have been selected")
 
     @commands.command()
     async def select_random_player(self):
