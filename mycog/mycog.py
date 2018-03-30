@@ -32,6 +32,8 @@ class Mycog:
         for player in options.replace(" ", "").split(","):
             # print(player[2:-1])
             self._add_player(server.get_member(player[2:-1]))
+        await self._select_spies(ctx)
+        await self._send_roles(ctx)
 
     @commands.command(pass_context=True)
     async def init(self, ctx):
@@ -74,6 +76,9 @@ class Mycog:
 
     @commands.command(pass_context=True)
     async def select_spies(self, ctx):
+        await self._select_spies(ctx)
+
+    async def _select_spies(self, ctx):
         server = ctx.message.server
         user = ctx.message.author
 
@@ -118,6 +123,9 @@ class Mycog:
 
     @commands.command(pass_context=True)
     async def send_roles(self, ctx):
+        await self._send_roles(ctx)
+
+    async def _send_roles(self, ctx):
         server = ctx.message.server
         print("Evils:")
         for id in list(self.settings["Spies"].keys()):
