@@ -1,5 +1,6 @@
 import discord
 import random
+from .utils.dataIO import dataIO
 from discord.ext import commands
 
 nbrOfSpies_vs_players = {
@@ -15,11 +16,22 @@ twofails = [7, 8, 9, 10]
 
 class Mycog:
     def __init__(self, bot):
+        print("")
+        print("")
+        print("")
         self.bot = bot
-        self.settings = {}
+
+    @commands.command(pass_context=True)
+    async def start(self, ctx, options: str):
+        server = ctx.message.server
+        self.settings = {} # reset
         self.settings["Players"] = {}
         self.settings["Spies"] = {}
         self.settings["Innocents"] = {}
+
+        for player in options.replace(" ", "").split(","):
+            # print(player[2:-1])
+            self._add_player(server.get_member(player[2:-1]))
 
     @commands.command(pass_context=True)
     async def init(self, ctx):
