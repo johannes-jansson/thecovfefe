@@ -95,7 +95,13 @@ class Mycog:
         channel = await self.bot.start_private_message(user)
         r = (await self.bot.wait_for_message(channel=channel,author=user))
         print(r.content)
-        await self.bot.say(r.content)
+        if r.content == "y" or r.content == "yes":
+            await self.bot.say("Somebody voted yes")
+        elif r.content == "n" or r.content == "no":
+            await self.bot.say("Somebody voted no")
+        else:
+            await self.bot.say("Somebody provided an invalid vote - that counts as a no")
+        # await self.bot.say(r.content)
 
 
     @commands.command(pass_context=True)
