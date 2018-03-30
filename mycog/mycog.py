@@ -19,15 +19,28 @@ class Mycog:
         self.settings = {}
         self.settings["Players"] = {}
 
-    @commands.command()
-    async def init(self):
+    @commands.command(pass_context=True)
+    async def init(self, ctx):
         server = ctx.message.server
         user = ctx.message.author
-        member_object = server.get_member("281455618559049730")
-        self._add_player(member_object)
-        # self._add_player("janzon#1925")
-        # self._add_player("ErikEdward#7782")
+        ids = [
+            "281455618559049730", # Davv_d
+            "312534277524946945", # Janzon
+            "217291426155855882", # Frulck
+            "426671139851468810"  # Erik
+        ]
+
+        for id in ids:
+            self._add_player(server.get_member(id))
         await self.bot.say("initialized")
+        # member_object = server.get_member("281455618559049730") # Davv_d
+        # self._add_player(member_object)
+        # member_object = server.get_member("312534277524946945") # Janzon
+        # self._add_player(member_object)
+        # member_object = server.get_member("426671139851468810") # Erik
+        # self._add_player(member_object)
+        # member_object = server.get_member("217291426155855882") # Frulck
+        # self._add_player(member_object)
 
     @commands.command()
     async def mycom(self):
