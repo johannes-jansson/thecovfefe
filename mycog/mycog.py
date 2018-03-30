@@ -2,7 +2,8 @@ import discord
 import random
 from discord.ext import commands
 
-spies = {
+nbrOfSpies_vs_players = {
+    "4": 2, # this one is just temporary
     "5": 2,
     "6": 2,
     "7": 3,
@@ -50,6 +51,25 @@ class Mycog:
         await self.bot.say(self.settings["Players"])
 
     @commands.command()
+    async def select_spies(self):
+        print("Started select_spies")
+        spies = []
+        innocents = self.settings["Players"]
+        print(innocents)
+        print(nbrOfSpies_vs_players)
+        nbrOfSpies = nbrOfSpies_vs_players[str(len(innocents))]
+        print(nbrOfSpies)
+        for i in range(nbrOfSpies):
+            spy = random.choice(list(innocents.keys()))
+            innocents.pop(spy)
+            spies.append(spy)
+        print("spies:")
+        print(spies)
+        print("innocents:")
+        print(innocents)
+        await self.bot.say(spies)
+
+    @commands.command()
     async def select_random_player(self):
         player = self._select_random_player()
         await self.bot.say(self.settings["Players"][player]["Mention"])
@@ -62,3 +82,8 @@ class Mycog:
 
 def setup(bot):
     bot.add_cog(Mycog(bot))
+
+if __name__ == '__main__':
+    mycog = Mycog()
+    mycog.init()
+    mycog.select_spies()
