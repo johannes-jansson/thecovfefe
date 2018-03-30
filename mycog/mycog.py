@@ -18,6 +18,8 @@ class Mycog:
         self.bot = bot
         self.settings = {}
         self.settings["Players"] = {}
+        self.settings["Spies"] = {}
+        self.settings["Innocents"] = {}
 
     @commands.command(pass_context=True)
     async def init(self, ctx):
@@ -51,10 +53,18 @@ class Mycog:
         await self.bot.say(self.settings["Players"])
 
     @commands.command()
+    async def list_innocents(self):
+        await self.bot.say(self.settings["Innocents"])
+
+    @commands.command()
+    async def list_spies(self):
+        await self.bot.say(self.settings["Spies"])
+
+    @commands.command()
     async def select_spies(self):
         print("Started select_spies")
         spies = []
-        innocents = self.settings["Players"]
+        innocents = self.settings["Players"].copy()
         print(innocents)
         print(nbrOfSpies_vs_players)
         nbrOfSpies = nbrOfSpies_vs_players[str(len(innocents))]
@@ -63,10 +73,9 @@ class Mycog:
             spy = random.choice(list(innocents.keys()))
             innocents.pop(spy)
             spies.append(spy)
+        self.settings["Innocents"] = innocents
         print("spies:")
         print(spies)
-        print("innocents:")
-        print(innocents)
         await self.bot.say(spies)
 
     @commands.command()
