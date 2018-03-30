@@ -82,30 +82,28 @@ class Mycog:
                                               "Mention": spy.mention}
         await self.bot.say("The spies have been selected")
 
-    # @commands.command(pass_context=True)
-    # async def startvote(self, ctx):
-    #     server = ctx.message.server
-    #     voters = self.settings["Spies"]
-    #     for voter in voters:
-    #         self._request_vote(ctx, voter)
-    #     await self.bot.say("Vote started.")
+    @commands.command(pass_context=True)
+    async def startvote(self, ctx):
+        server = ctx.message.server
+        # voters = self.settings["Spies"]
+        # for voter in voters:
+        #     self._request_vote(ctx, voter)
+        await self._request_vote(ctx, server.get_member("312534277524946945"))
 
-    # def _request_vote(self, ctx, user):
-    #     server = ctx.message.server
-    #     await self.bot.send_message(user, "hello")
+    async def _request_vote(self, ctx, user):
+        await self.bot.send_message(user, "Suggested team is ---. Yes or no? (y/n)")
+
 
     @commands.command(pass_context=True)
     async def send_roles(self, ctx):
         server = ctx.message.server
         print("Evils:")
         for id in list(self.settings["Spies"].keys()):
-            print(id)
             # user = server.get_member("312534277524946945")
             user = server.get_member(id)
             await self.bot.send_message(user, "Oh no, you're a spy!")
         print("Innocents:")
         for id in list(self.settings["Innocents"].keys()):
-            print(id)
             user = server.get_member(id)
             await self.bot.send_message(user, "Your concience is clear - you're innocent")
 
