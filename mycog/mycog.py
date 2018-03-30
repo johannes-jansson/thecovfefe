@@ -21,8 +21,12 @@ class Mycog:
 
     @commands.command()
     async def init(self):
-        self.settings["Players"]["<@312534277524946945>"] = {"Name": user.name,
-                                                             "Mention": user.mention}
+        server = ctx.message.server
+        user = ctx.message.author
+        member_object = server.get_member("281455618559049730")
+        self._add_player(member_object)
+        # self._add_player("janzon#1925")
+        # self._add_player("ErikEdward#7782")
         await self.bot.say("initialized")
 
     @commands.command()
@@ -31,13 +35,16 @@ class Mycog:
 
     @commands.command()
     async def add_player(self, user : discord.Member):
+        self._add_player(user)
+        await self.bot.say("Added " + user.mention + " to the game.")
+
+    def _add_player(self, user : discord.Member):
         print(user)
         print(user.id)
         print(user.name)
         print(user.mention)
         self.settings["Players"][user.id] = {"Name": user.name,
                                              "Mention": user.mention}
-        await self.bot.say("Added " + user.mention + " to the game.")
 
     @commands.command()
     async def list_players(self):
