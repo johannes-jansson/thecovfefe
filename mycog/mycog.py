@@ -82,17 +82,6 @@ class Mycog:
                                               "Mention": spy.mention}
         await self.bot.say("The spies have been selected")
 
-    @commands.command()
-    async def select_random_player(self):
-        player = self._select_random_player()
-        await self.bot.say(self.settings["Players"][player]["Mention"])
-
-    def _select_random_player(self):
-        players = list(self.settings["Players"].keys())
-        player = random.choice(players)
-        return player
-
-
 def setup(bot):
     bot.add_cog(Mycog(bot))
 
