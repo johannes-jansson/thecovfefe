@@ -9,9 +9,11 @@ All players should be shuffeled into a play order, that should be displayed with
 
 `covfefenominate NN, NN` can only be invoked by the current leader. Whenever called, it initiates a semi-closed vote.
 
-`covfefevote y/yes/n/no` can be called once by each player. When this is done by all players, the results are displayed. If the vote fails, next player becomes leader and the failcounter is increased by one. If the vote passes, the failcounter is reset and the nominated players get to do a closed vote. 
+Every player now recieves a DM with voting instructions. You vote by replying y or n. When this is done by all players, the results are displayed (with names of the voters). If the vote fails, next player becomes leader and the failcounter is increased by one. If the vote passes, the failcounter is reset and the nominated players get to do a closed vote. 
 
-`covfefevote p/pass/f/fail` will have to be called by all nominated players. Innocent players can vote whatever they want, it will still be interpreted as a pass. Other players votes actually matter. If all votes (or all but 1) are pass, this is displayed. If not, this is displayed. The "scoreboard" is updated, and the next round begins. 
+Every nominated player not recieves a DM with voting instructions. Innocent players can vote whatever they want, it will still be interpreted as a pass. Other players votes actually matter. If all votes (or all but 1) are pass, this is displayed. If not, this is displayed. The "scoreboard" is updated, and the next round begins. 
+
+Between each of the steps the "scoreboard" is printed: number of missions remaining, fail counter etc. 
 
 ## Cogs that may or may not be useful inspiration
 - https://cogs.red/cogs/flapjax/FlapJack-Cogs/reactpoll/
