@@ -1,6 +1,12 @@
 # thecovfefe
 A discord bot for playing the amazing deception game The Covfefe (inspired by [The Resistance](https://en.wikipedia.org/wiki/The_Resistance_(game)))
 
+## Backstory
+
+Congratulations! The russian hackers did it, Trump is now in charge of the oval office and the "free" world! You're part of the Trump administration and things are looking good, but wait... ...is that a true American patriot I see? What in the world is he doing in the presidential administration? Blyat!
+
+Your job as a russian sympathizer is to unmask the american patriots hiding within your ranks. As an american patriot you have to remain hidden in order to overhtrow the russian threat against your constitutional rights! Make America truly great again!
+
 ## How a game could look like
 
 `covfefestart` should start a game with all members of the current channel. Every player should recieve a message with the text "Congrats! You are a russian sympathizer" if they are innocent, or "Oh no! You are an american patriot, together with NN and NN" if they are not.
