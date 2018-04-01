@@ -185,11 +185,11 @@ class Mycog:
         for id in list(self.settings["Spies"].keys()):
             # user = server.get_member("312534277524946945")
             user = server.get_member(id)
-            await self.bot.send_message(user, "Oh no, you're a spy!")
+            await self.bot.send_message(user, "Oh no, you're an american patriot! What are you doing in the oval office?! :flag_us:")
         print("Innocents:")
         for id in list(self.settings["Innocents"].keys()):
             user = server.get_member(id)
-            await self.bot.send_message(user, "Your concience is clear - you're innocent")
+            await self.bot.send_message(user, "Your concience is clear - you're a good ole' russian infiltrator! :flag_ru:")
 
 
 
