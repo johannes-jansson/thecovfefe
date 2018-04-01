@@ -4,6 +4,7 @@ from random import shuffle
 from .utils.dataIO import dataIO
 from discord.ext import commands
 
+numberEmojis = [":zero:", ":one:", ":two:", ":three:", ":four:", ":five:"]
 nbrOfSpies_vs_players = {
     "2": 1, # this one is just temporary
     "5": 2,
@@ -43,7 +44,7 @@ class Mycog:
         self.settings["Innocents"] = {}
         self.settings["voteTrackCounter"] = 0
         self.settings["missionCounter"] = 0
-        self.settings["missionResults"] = []
+        self.settings["missionResults"] = [] # append booleans
 
         players = []
         for player in options.replace(" ", "").split(","):
@@ -63,9 +64,12 @@ class Mycog:
         server = ctx.message.server
         outstring = "Scoreboard:\n"
         for i in range(self.settings["missionCounter"]):
-            outstring = outstring + "[" + str(self.settings["missionResults"][i]) + "] "
+            if self.settings["missionResults"][i]:
+                outstring = outstring + ":flag_ru:" + " "
+            else:
+                outstring = outstring + ":flag_us:" + " "
         for i in range(self.settings["missionCounter"], 5):
-            outstring = outstring + "[" + str(missions[str(len(self.settings["Players"]))][i]) + "] "
+            outstring = outstring + numberEmojis[missions[str(len(self.settings["Players"]))][i]] + " "
 
         outstring = outstring + "\n\nVote track: " + str(self.settings["voteTrackCounter"]) + "/5 tries\n\n" + str(len(self.settings["Players"])) + " players, " + str(len(self.settings["Spies"])) + " spies\n\n"
         await self.bot.say(outstring)
