@@ -4,6 +4,13 @@ from random import shuffle
 from .utils.dataIO import dataIO
 from discord.ext import commands
 
+innocentmessages = [
+    "Your concience is clear - you're a good ole' russian infiltrator! :flag_ru:"
+]
+spymessages = [
+    "Oh no, you're an american patriot! What are you doing in the oval office?! :flag_us:"
+]
+
 numberEmojis = [":zero:", ":one:", ":two:", ":three:", ":four:", ":five:"]
 nbrOfSpies_vs_players = {
     "2": 1, # this one is just temporary
@@ -52,7 +59,7 @@ class Mycog:
             self.settings["playerOrder"].append(server.get_member(player[2:-1]))
         shuffle(self.settings["playerOrder"])
         await self._select_spies(ctx)
-        # await self._send_roles(ctx)
+        await self._send_roles(ctx)
         await self._display_scoreboard(ctx)
         await self._display_player_order(ctx)
 
@@ -185,11 +192,11 @@ class Mycog:
         for id in list(self.settings["Spies"].keys()):
             # user = server.get_member("312534277524946945")
             user = server.get_member(id)
-            await self.bot.send_message(user, "Oh no, you're an american patriot! What are you doing in the oval office?! :flag_us:")
+            await self.bot.send_message(user, random.choice(spymessages))
         print("Innocents:")
         for id in list(self.settings["Innocents"].keys()):
             user = server.get_member(id)
-            await self.bot.send_message(user, "Your concience is clear - you're a good ole' russian infiltrator! :flag_ru:")
+            await self.bot.send_message(user, random.choice(innocentmessages))
 
 
 
