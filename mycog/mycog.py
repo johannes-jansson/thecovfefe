@@ -39,28 +39,23 @@ class Mycog:
             self.settings["playerOrder"].append(server.get_member(player[2:-1]))
         shuffle(self.settings["playerOrder"])
         print(self.settings["playerOrder"])
-        # await self._select_spies(ctx)
+        await self._select_spies(ctx)
         # await self._send_roles(ctx)
 
     @commands.command(pass_context=True)
     async def display_player_order(self, ctx):
-        print("about to call")
         await self._display_player_order(ctx)
 
     async def _display_player_order(self, ctx):
-        print("entered")
         server = ctx.message.server
         players = self.settings["playerOrder"]
-        print(players)
+        await self.bot.say("Players: ")
         for player in players:
-            playerName = server.get_member(player.id)
-            print(playerName)
-            playerName = playerName.name
-            print(playerName)
+            playerName = server.get_member(player.id).name
             if players.index(player) == self.settings["currentPlayer"]:
-                await self.bot.say(playerName + " <-")
+                await self.bot.say(str(players.index(player) + 1) + ". " + playerName + " <-")
             else:
-                await self.bot.say(playerName)
+                await self.bot.say(str(players.index(player) + 1) + ". " + playerName)
 
     @commands.command(pass_context=True)
     async def init(self, ctx):
