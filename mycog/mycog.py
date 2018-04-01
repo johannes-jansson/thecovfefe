@@ -187,12 +187,20 @@ class Mycog:
         await self._send_roles(ctx)
 
     async def _send_roles(self, ctx):
+        print("")
+        print("### send roles")
         server = ctx.message.server
+        spies = list(self.settings["Spies"].keys())
+        print(spies)
         print("Evils:")
         for id in list(self.settings["Spies"].keys()):
             # user = server.get_member("312534277524946945")
             user = server.get_member(id)
-            await self.bot.send_message(user, random.choice(spymessages))
+            outstring = random.choice(spymessages) + "\n"
+            outstring = outstring + "Patriots this round are:\n"
+            for spy in spies:
+                outstring = outstring + server.get_member(spy).mention + "\n"
+            await self.bot.send_message(user, outstring)
         print("Innocents:")
         for id in list(self.settings["Innocents"].keys()):
             user = server.get_member(id)
