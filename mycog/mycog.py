@@ -1,5 +1,6 @@
 import discord
 import random
+from random import shuffle
 from .utils.dataIO import dataIO
 from discord.ext import commands
 
@@ -26,14 +27,19 @@ class Mycog:
         server = ctx.message.server
         self.settings = {} # reset
         self.settings["Players"] = {}
+        self.settings["PlayerOrder"] = []
         self.settings["Spies"] = {}
         self.settings["Innocents"] = {}
 
+        print(options.replace(" ", "").split(","))
+        players = []
         for player in options.replace(" ", "").split(","):
-            # print(player[2:-1])
             self._add_player(server.get_member(player[2:-1]))
-        await self._select_spies(ctx)
-        await self._send_roles(ctx)
+            players.append(server.get_member(player[2:-1]))
+        shuffle(players)
+        print(players)
+        # await self._select_spies(ctx)
+        # await self._send_roles(ctx)
 
     @commands.command(pass_context=True)
     async def init(self, ctx):
