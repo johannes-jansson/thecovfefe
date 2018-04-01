@@ -53,7 +53,7 @@ class Mycog:
         for i in range(1,6):
             outstring = outstring + "[" + str(i) + "] "
 
-        outstring = outstring + "\n\nVote track: " + str(self.settings["voteTrackMeter"]) + "/5 tries\n\n4 players, 2 spies\n\n"
+        outstring = outstring + "\n\nVote track: " + str(self.settings["voteTrackMeter"]) + "/5 tries\n\n" + str(len(self.settings["Players"])) + " players, " + str(len(self.settings["Spies"])) + " spies\n\n"
         await self.bot.say(outstring)
 
     @commands.command(pass_context=True)
