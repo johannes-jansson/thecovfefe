@@ -31,6 +31,7 @@ class Mycog:
         self.settings["currentPlayer"] = 0
         self.settings["Spies"] = {}
         self.settings["Innocents"] = {}
+        self.settings["voteTrackMeter"] = 0
 
         players = []
         for player in options.replace(" ", "").split(","):
@@ -52,7 +53,7 @@ class Mycog:
         for i in range(1,6):
             outstring = outstring + "[" + str(i) + "] "
 
-        outstring = outstring + "\n\nVote track: 0/5 tries\n\n4 players, 2 spies\n\n"
+        outstring = outstring + "\n\nVote track: " + str(self.settings["voteTrackMeter"]) + "/5 tries\n\n4 players, 2 spies\n\n"
         await self.bot.say(outstring)
 
     @commands.command(pass_context=True)
