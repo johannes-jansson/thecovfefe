@@ -5,7 +5,7 @@ from .utils.dataIO import dataIO
 from discord.ext import commands
 
 nbrOfSpies_vs_players = {
-    "4": 2, # this one is just temporary
+    "2": 1, # this one is just temporary
     "5": 2,
     "6": 2,
     "7": 3,
@@ -14,6 +14,16 @@ nbrOfSpies_vs_players = {
     "10": 4
 }
 twofails = [7, 8, 9, 10]
+
+missions = {
+    "2" : [1,1,1,1,1],
+    "5" : [2,3,2,3,3],
+    "6" : [2,3,4,3,4],
+    "7" : [2,3,3,4,4],
+    "8" : [3,4,4,5,5],
+    "9" : [3,4,4,5,5],
+    "10": [3,4,4,5,5]
+}
 
 class Mycog:
     def __init__(self, bot):
@@ -31,14 +41,16 @@ class Mycog:
         self.settings["currentPlayer"] = 0
         self.settings["Spies"] = {}
         self.settings["Innocents"] = {}
-        self.settings["voteTrackMeter"] = 0
+        self.settings["voteTrackCounter"] = 0
+        self.settings["missionCounter"] = 0
+        self.settings["missionResults"] = []
 
         players = []
         for player in options.replace(" ", "").split(","):
             self._add_player(server.get_member(player[2:-1]))
             self.settings["playerOrder"].append(server.get_member(player[2:-1]))
         shuffle(self.settings["playerOrder"])
-        # await self._select_spies(ctx)
+        await self._select_spies(ctx)
         # await self._send_roles(ctx)
         await self._display_scoreboard(ctx)
         await self._display_player_order(ctx)
@@ -50,10 +62,12 @@ class Mycog:
     async def _display_scoreboard(self, ctx):
         server = ctx.message.server
         outstring = "Scoreboard:\n"
-        for i in range(1,6):
-            outstring = outstring + "[" + str(i) + "] "
+        for i in range(self.settings["missionCounter"]):
+            outstring = outstring + "[" + str(self.settings["missionResults"][i]) + "] "
+        for i in range(self.settings["missionCounter"], 5):
+            outstring = outstring + "[" + str(missions[str(len(self.settings["Players"]))][i]) + "] "
 
-        outstring = outstring + "\n\nVote track: " + str(self.settings["voteTrackMeter"]) + "/5 tries\n\n" + str(len(self.settings["Players"])) + " players, " + str(len(self.settings["Spies"])) + " spies\n\n"
+        outstring = outstring + "\n\nVote track: " + str(self.settings["voteTrackCounter"]) + "/5 tries\n\n" + str(len(self.settings["Players"])) + " players, " + str(len(self.settings["Spies"])) + " spies\n\n"
         await self.bot.say(outstring)
 
     @commands.command(pass_context=True)
