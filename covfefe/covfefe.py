@@ -33,7 +33,7 @@ missions = {
     "10": [3,4,4,5,5]
 }
 
-class Mycog:
+class Covfefe:
     def __init__(self, bot):
         print("")
         print("")
@@ -42,6 +42,9 @@ class Mycog:
 
     @commands.command(pass_context=True)
     async def start(self, ctx, options: str):
+        await self._start(ctx, options)
+
+    async def _start(self, ctx, options: str):
         server = ctx.message.server
         self.settings = {} # reset
         self.settings["Players"] = {}
@@ -220,9 +223,4 @@ class Mycog:
 
 
 def setup(bot):
-    bot.add_cog(Mycog(bot))
-
-if __name__ == '__main__':
-    mycog = Mycog()
-    mycog.init()
-    mycog.select_spies()
+    bot.add_cog(Covfefe(bot))
