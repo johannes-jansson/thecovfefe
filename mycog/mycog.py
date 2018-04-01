@@ -28,6 +28,7 @@ class Mycog:
         self.settings = {} # reset
         self.settings["Players"] = {}
         self.settings["playerOrder"] = []
+        self.settings["currentPlayer"] = 0
         self.settings["Spies"] = {}
         self.settings["Innocents"] = {}
 
@@ -40,6 +41,26 @@ class Mycog:
         print(self.settings["playerOrder"])
         # await self._select_spies(ctx)
         # await self._send_roles(ctx)
+
+    @commands.command(pass_context=True)
+    async def display_player_order(self, ctx):
+        print("about to call")
+        await self._display_player_order(ctx)
+
+    async def _display_player_order(self, ctx):
+        print("entered")
+        server = ctx.message.server
+        players = self.settings["playerOrder"]
+        print(players)
+        for player in players:
+            playerName = server.get_member(player.id)
+            print(playerName)
+            playerName = playerName.name
+            print(playerName)
+            if players.index(player) == self.settings["currentPlayer"]:
+                await self.bot.say(playerName + " <-")
+            else:
+                await self.bot.say(playerName)
 
     @commands.command(pass_context=True)
     async def init(self, ctx):
