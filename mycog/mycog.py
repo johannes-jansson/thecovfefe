@@ -32,15 +32,28 @@ class Mycog:
         self.settings["Spies"] = {}
         self.settings["Innocents"] = {}
 
-        print(options.replace(" ", "").split(","))
         players = []
         for player in options.replace(" ", "").split(","):
             self._add_player(server.get_member(player[2:-1]))
             self.settings["playerOrder"].append(server.get_member(player[2:-1]))
         shuffle(self.settings["playerOrder"])
-        print(self.settings["playerOrder"])
-        await self._select_spies(ctx)
+        # await self._select_spies(ctx)
         # await self._send_roles(ctx)
+        await self._display_scoreboard(ctx)
+        await self._display_player_order(ctx)
+
+    @commands.command(pass_context=True)
+    async def display_scoreboard(self, ctx):
+        await self._display_scoreboard(ctx)
+
+    async def _display_scoreboard(self, ctx):
+        server = ctx.message.server
+        outstring = "Scoreboard:\n"
+        for i in range(1,6):
+            outstring = outstring + "[" + str(i) + "] "
+
+        outstring = outstring + "\n\nVote track: 0/5 tries\n\n4 players, 2 spies\n\n"
+        await self.bot.say(outstring)
 
     @commands.command(pass_context=True)
     async def display_player_order(self, ctx):
