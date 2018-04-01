@@ -27,7 +27,7 @@ class Mycog:
         server = ctx.message.server
         self.settings = {} # reset
         self.settings["Players"] = {}
-        self.settings["PlayerOrder"] = []
+        self.settings["playerOrder"] = []
         self.settings["Spies"] = {}
         self.settings["Innocents"] = {}
 
@@ -35,9 +35,9 @@ class Mycog:
         players = []
         for player in options.replace(" ", "").split(","):
             self._add_player(server.get_member(player[2:-1]))
-            players.append(server.get_member(player[2:-1]))
-        shuffle(players)
-        print(players)
+            self.settings["playerOrder"].append(server.get_member(player[2:-1]))
+        shuffle(self.settings["playerOrder"])
+        print(self.settings["playerOrder"])
         # await self._select_spies(ctx)
         # await self._send_roles(ctx)
 
