@@ -62,6 +62,17 @@ class Mycog:
         await self._send_roles(ctx)
         await self._display_scoreboard(ctx)
         await self._display_player_order(ctx)
+        await self._notify_leader(ctx)
+
+    @commands.command(pass_context=True)
+    async def notify_leader(self, ctx):
+        await self._notify_leader(ctx)
+
+    async def _notify_leader(self, ctx):
+        server = ctx.message.server
+        leader = self.settings["playerOrder"][self.settings["currentPlayer"]].mention
+        players = missions[str(len(self.settings["Players"]))][self.settings["missionCounter"]]
+        await self.bot.say(leader + ", it's your turn to nominate a team! Nominate " + str(players) + " players to go on a mission by writing `covfefenominate \"@player1 , @player2 \"` but with the actual players you want to nominate.")
 
     @commands.command(pass_context=True)
     async def display_scoreboard(self, ctx):
