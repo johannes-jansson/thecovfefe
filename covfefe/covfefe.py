@@ -1,7 +1,7 @@
 import discord
 import random
 from random import shuffle
-from .utils.dataIO import dataIO
+# from .utils.dataIO import dataIO
 from discord.ext import commands
 
 innocentmessages = [
@@ -13,7 +13,7 @@ spymessages = [
 
 numberEmojis = [":zero:", ":one:", ":two:", ":three:", ":four:", ":five:"]
 nbrOfSpies_vs_players = {
-    "2": 1, # this one is just temporary
+    "2": 1,  # this one is just temporary
     "5": 2,
     "6": 2,
     "7": 3,
@@ -24,14 +24,15 @@ nbrOfSpies_vs_players = {
 twofails = [7, 8, 9, 10]
 
 missions = {
-    "2" : [1,1,1,1,1],
-    "5" : [2,3,2,3,3],
-    "6" : [2,3,4,3,4],
-    "7" : [2,3,3,4,4],
-    "8" : [3,4,4,5,5],
-    "9" : [3,4,4,5,5],
-    "10": [3,4,4,5,5]
+    "2": [1, 1, 1, 1, 1],
+    "5": [2, 3, 2, 3, 3],
+    "6": [2, 3, 4, 3, 4],
+    "7": [2, 3, 3, 4, 4],
+    "8": [3, 4, 4, 5, 5],
+    "9": [3, 4, 4, 5, 5],
+    "10": [3, 4, 4, 5, 5]
 }
+
 
 class Covfefe:
     def __init__(self, bot):
@@ -46,7 +47,7 @@ class Covfefe:
 
     async def _start(self, ctx, options: str):
         server = ctx.message.server
-        self.settings = {} # reset
+        self.settings = {}  # reset
         self.settings["Players"] = {}
         self.settings["playerOrder"] = []
         self.settings["currentPlayer"] = 0
@@ -54,9 +55,9 @@ class Covfefe:
         self.settings["Innocents"] = {}
         self.settings["voteTrackCounter"] = 0
         self.settings["missionCounter"] = 0
-        self.settings["missionResults"] = [] # append booleans
+        self.settings["missionResults"] = []  # append booleans
 
-        players = []
+        # players = []
         for player in options.replace(" ", "").split(","):
             self._add_player(server.get_member(player[2:-1]))
             self.settings["playerOrder"].append(server.get_member(player[2:-1]))
@@ -72,7 +73,7 @@ class Covfefe:
         await self._notify_leader(ctx)
 
     async def _notify_leader(self, ctx):
-        server = ctx.message.server
+        # server = ctx.message.server
         leader = self.settings["playerOrder"][self.settings["currentPlayer"]].mention
         players = missions[str(len(self.settings["Players"]))][self.settings["missionCounter"]]
         await self.bot.say(leader + ", it's your turn to nominate a team! Nominate " + str(players) + " players to go on a mission by writing `covfefenominate \"@player1 , @player2 \"` but with the actual players you want to nominate.")
@@ -82,7 +83,7 @@ class Covfefe:
         await self._display_scoreboard(ctx)
 
     async def _display_scoreboard(self, ctx):
-        server = ctx.message.server
+        # server = ctx.message.server
         outstring = "Scoreboard:\n"
         for i in range(self.settings["missionCounter"]):
             if self.settings["missionResults"][i]:
@@ -113,23 +114,23 @@ class Covfefe:
     @commands.command(pass_context=True)
     async def init(self, ctx):
         server = ctx.message.server
-        user = ctx.message.author
+        # user = ctx.message.author
         ids = [
-            "281455618559049730", # Davv_d
-            "312534277524946945", # Janzon
-            "217291426155855882", # Frulck
-            "426671139851468810"  # Erik
+            "281455618559049730",  # Davv_d
+            "312534277524946945",  # Janzon
+            "217291426155855882",  # Frulck
+            "426671139851468810"   # Erik
         ]
         for id in ids:
             self._add_player(server.get_member(id))
         await self.bot.say("initialized")
 
     @commands.command()
-    async def add_player(self, user : discord.Member):
+    async def add_player(self, user: discord.Member):
         self._add_player(user)
         await self.bot.say("Added " + user.mention + " to the game.")
 
-    def _add_player(self, user : discord.Member):
+    def _add_player(self, user: discord.Member):
         print(user)
         print(user.id)
         print(user.name)
@@ -155,7 +156,7 @@ class Covfefe:
 
     async def _select_spies(self, ctx):
         server = ctx.message.server
-        user = ctx.message.author
+        # user = ctx.message.author
 
         print("Started select_spies")
         spies = []
@@ -185,7 +186,7 @@ class Covfefe:
     async def _request_vote(self, ctx, user):
         await self.bot.send_message(user, "Suggested team is ---. Yes or no? (y/n)")
         channel = await self.bot.start_private_message(user)
-        r = (await self.bot.wait_for_message(channel=channel,author=user))
+        r = (await self.bot.wait_for_message(channel=channel, author=user))
         print(r.content)
         if r.content == "y" or r.content == "yes":
             await self.bot.say("Somebody voted yes")
@@ -194,7 +195,6 @@ class Covfefe:
         else:
             await self.bot.say("Somebody provided an invalid vote - that counts as a no")
         # await self.bot.say(r.content)
-
 
     @commands.command(pass_context=True)
     async def send_roles(self, ctx):
@@ -219,7 +219,6 @@ class Covfefe:
         for id in list(self.settings["Innocents"].keys()):
             user = server.get_member(id)
             await self.bot.send_message(user, random.choice(innocentmessages))
-
 
 
 def setup(bot):
