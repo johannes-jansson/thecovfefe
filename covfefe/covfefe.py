@@ -57,60 +57,17 @@ class Covfefe:
         self.settings["missionCounter"] = 0
         self.settings["missionResults"] = []  # append booleans
         self.settings["nominated"] = []
+        self.settings["votingresults"] = {}
 
-        players = []
         for player in options.replace(" ", "").split(","):
             self._add_player(server.get_member(player[2:-1]))
             self.settings["playerOrder"].append(server.get_member(player[2:-1]))
-        shuffle(self.settings["playerOrder"])
+        # shuffle(self.settings["playerOrder"])
         await self._select_spies(ctx)
         await self._send_roles(ctx)
         await self._display_scoreboard(ctx)
         await self._display_player_order(ctx)
         await self._notify_leader(ctx)
-
-    @commands.command(pass_context=True)
-    async def notify_leader(self, ctx):
-        await self._notify_leader(ctx)
-
-    async def _notify_leader(self, ctx):
-        server = ctx.message.server
-        leader = self.settings["playerOrder"][self.settings["currentPlayer"]].mention
-        players = missions[str(len(self.settings["Players"]))][self.settings["missionCounter"]]
-        await self.bot.say(leader + ", it's your turn to nominate a team! Nominate " + str(players) + " players to go on a mission by writing `covfefenominate \"@player1 , @player2 \"` but with the actual players you want to nominate.")
-
-    @commands.command(pass_context=True)
-    async def display_scoreboard(self, ctx):
-        await self._display_scoreboard(ctx)
-
-    async def _display_scoreboard(self, ctx):
-        server = ctx.message.server
-        outstring = "Scoreboard:\n"
-        for i in range(self.settings["missionCounter"]):
-            if self.settings["missionResults"][i]:
-                outstring = outstring + ":flag_ru:" + " "
-            else:
-                outstring = outstring + ":flag_us:" + " "
-        for i in range(self.settings["missionCounter"], 5):
-            outstring = outstring + numberEmojis[missions[str(len(self.settings["Players"]))][i]] + " "
-
-        outstring = outstring + "\n\nVote track: " + str(self.settings["voteTrackCounter"]) + "/5 tries\n\n" + str(len(self.settings["Players"])) + " players, " + str(len(self.settings["Spies"])) + " spies\n\n"
-        await self.bot.say(outstring)
-
-    @commands.command(pass_context=True)
-    async def display_player_order(self, ctx):
-        await self._display_player_order(ctx)
-
-    async def _display_player_order(self, ctx):
-        server = ctx.message.server
-        players = self.settings["playerOrder"]
-        await self.bot.say("Players: ")
-        for player in players:
-            playerName = server.get_member(player.id).name
-            if players.index(player) == self.settings["currentPlayer"]:
-                await self.bot.say(str(players.index(player) + 1) + ". " + playerName + " <-")
-            else:
-                await self.bot.say(str(players.index(player) + 1) + ". " + playerName)
 
     @commands.command(pass_context=True)
     async def init(self, ctx):
@@ -126,6 +83,8 @@ class Covfefe:
             self._add_player(server.get_member(id))
         await self.bot.say("initialized")
 
+    # PHASE ONE
+    ###########
     @commands.command()
     async def add_player(self, user: discord.Member):
         self._add_player(user)
@@ -138,47 +97,6 @@ class Covfefe:
         print(user.mention)
         self.settings["Players"][user.id] = {"Name": user.name,
                                              "Mention": user.mention}
-
-    @commands.command(pass_context=True)
-    async def nominate(self, ctx, options: str):
-        await self._nominate(ctx, options)
-
-    async def _nominate(self, ctx, options: str):
-        server = ctx.message.server
-        print("ost")
-        print(ctx.message.author)
-        print(self.settings["playerOrder"][self.settings["currentPlayer"]])
-
-        if ctx.message.author != self.settings["playerOrder"][self.settings["currentPlayer"]]:
-            await self.bot.say("You're not the game leader! " + self.settings["playerOrder"][self.settings["currentPlayer"]].mention + " must nominate a squad!")
-        else:
-
-            self.settings["nominated"] = []
-
-            for player in options.replace(" ", "").split(","):
-                self.settings["nominated"].append(server.get_member(player[2:-1]))
-
-            try:
-                if len(self.settings["nominated"]) == missions[str(len(self.settings["Players"]))][self.settings["missionCounter"]]:
-                    await self._display_nominated(ctx)
-                else:
-                    await self.bot.say("Inncorrect number of nominees, something is sketchy here! Vote failed automatically")
-            except KeyError:
-                await self.bot.say("Inncorrect nomination, something is very sketchy here! Vote failed automatically")
-
-
-    @commands.command(pass_context=True)
-    async def display_nominated(self, ctx):
-        await self._display_nominated(ctx)
-
-    async def _display_nominated(self, ctx):
-        server = ctx.message.server
-        players = self.settings["nominated"]
-        await self.bot.say("Nominated players: ")
-        for player in players:
-            playerName = server.get_member(player.id).name
-            await self.bot.say(str(players.index(player) + 1) + ". " + playerName)
-
 
     @commands.command(pass_context=True)
     async def list_players(self):
@@ -217,26 +135,39 @@ class Covfefe:
                                               "Mention": spy.mention}
         await self.bot.say("The spies have been selected")
 
-    @commands.command(pass_context=True)
-    async def startvote(self, ctx):
-        server = ctx.message.server
-        # voters = self.settings["Spies"]
-        # for voter in voters:
-        #     self._request_vote(ctx, voter)
-        await self._request_vote(ctx, server.get_member("312534277524946945"))
 
-    async def _request_vote(self, ctx, user):
-        await self.bot.send_message(user, "Suggested team is ---. Yes or no? (y/n)")
-        channel = await self.bot.start_private_message(user)
-        r = (await self.bot.wait_for_message(channel=channel, author=user))
-        print(r.content)
-        if r.content == "y" or r.content == "yes":
-            await self.bot.say("Somebody voted yes")
-        elif r.content == "n" or r.content == "no":
-            await self.bot.say("Somebody voted no")
-        else:
-            await self.bot.say("Somebody provided an invalid vote - that counts as a no")
-        # await self.bot.say(r.content)
+    @commands.command(pass_context=True)
+    async def display_scoreboard(self, ctx):
+        await self._display_scoreboard(ctx)
+
+    async def _display_scoreboard(self, ctx):
+        server = ctx.message.server
+        outstring = "Scoreboard:\n"
+        for i in range(self.settings["missionCounter"]):
+            if self.settings["missionResults"][i]:
+                outstring = outstring + ":flag_ru:" + " "
+            else:
+                outstring = outstring + ":flag_us:" + " "
+        for i in range(self.settings["missionCounter"], 5):
+            outstring = outstring + numberEmojis[missions[str(len(self.settings["Players"]))][i]] + " "
+
+        outstring = outstring + "\n\nVote track: " + str(self.settings["voteTrackCounter"]) + "/5 tries\n\n" + str(len(self.settings["Players"])) + " players, " + str(len(self.settings["Spies"])) + " spies\n\n"
+        await self.bot.say(outstring)
+
+    @commands.command(pass_context=True)
+    async def display_player_order(self, ctx):
+        await self._display_player_order(ctx)
+
+    async def _display_player_order(self, ctx):
+        server = ctx.message.server
+        players = self.settings["playerOrder"]
+        await self.bot.say("Players: ")
+        for player in players:
+            playerName = server.get_member(player.id).name
+            if players.index(player) == self.settings["currentPlayer"]:
+                await self.bot.say(str(players.index(player) + 1) + ". " + playerName + " <-")
+            else:
+                await self.bot.say(str(players.index(player) + 1) + ". " + playerName)
 
     @commands.command(pass_context=True)
     async def send_roles(self, ctx):
@@ -261,6 +192,110 @@ class Covfefe:
         for id in list(self.settings["Innocents"].keys()):
             user = server.get_member(id)
             await self.bot.send_message(user, random.choice(innocentmessages))
+
+    @commands.command(pass_context=True)
+    async def notify_leader(self, ctx):
+        await self._notify_leader(ctx)
+
+    async def _notify_leader(self, ctx):
+        server = ctx.message.server
+        leader = self.settings["playerOrder"][self.settings["currentPlayer"]].mention
+        players = missions[str(len(self.settings["Players"]))][self.settings["missionCounter"]]
+        await self.bot.say(leader + ", it's your turn to nominate a team! Nominate " + str(players) + " players to go on a mission by writing `covfefenominate \"@player1 , @player2 \"` but with the actual players you want to nominate.")
+
+    @commands.command(pass_context=True)
+    async def nominate(self, ctx, options: str):
+        await self._nominate(ctx, options)
+
+    async def _nominate(self, ctx, options: str):
+        server = ctx.message.server
+        print("ost")
+        print(ctx.message.author)
+        print(self.settings["playerOrder"][self.settings["currentPlayer"]])
+
+        if ctx.message.author != self.settings["playerOrder"][self.settings["currentPlayer"]]:
+            await self.bot.say("You're not the game leader! " + self.settings["playerOrder"][self.settings["currentPlayer"]].mention + " must nominate a squad!")
+        else:
+
+            self.settings["nominated"] = []
+
+            for player in options.replace(" ", "").split(","):
+                self.settings["nominated"].append(server.get_member(player[2:-1]))
+
+            try:
+                if len(self.settings["nominated"]) == missions[str(len(self.settings["Players"]))][self.settings["missionCounter"]]:
+                    await self._display_nominated(ctx)
+                else:
+                    await self.bot.say("Inncorrect number of nominees, something is sketchy here! Vote failed automatically")
+            except KeyError:
+                await self.bot.say("Inncorrect nomination, something is very sketchy here! Vote failed automatically")
+
+    # PHASE TWO
+    ###########
+    @commands.command(pass_context=True)
+    async def display_nominated(self, ctx):
+        await self._display_nominated(ctx)
+
+    async def _display_nominated(self, ctx):
+        server = ctx.message.server
+        players = self.settings["nominated"]
+        await self.bot.say("Nominated players: ")
+        for player in players:
+            playerName = server.get_member(player.id).name
+            await self.bot.say(str(players.index(player) + 1) + ". " + playerName)
+        await self._send_approve_vote(ctx)
+
+    @commands.command(pass_context=True)
+    async def startvote(self, ctx):
+        server = ctx.message.server
+        # voters = self.settings["Spies"]
+        # for voter in voters:
+        #     self._request_vote(ctx, voter)
+        await self._request_vote(ctx, server.get_member("312534277524946945"))
+
+    async def _request_vote(self, ctx, user):
+        await self.bot.send_message(user, "Suggested team is ---. Yes or no? (y/n)")
+        channel = await self.bot.start_private_message(user)
+        r = (await self.bot.wait_for_message(channel=channel, author=user))
+        print(r.content)
+        if r.content == "y" or r.content == "yes":
+            await self.bot.say("Somebody voted yes")
+        elif r.content == "n" or r.content == "no":
+            await self.bot.say("Somebody voted no")
+        else:
+            await self.bot.say("Somebody provided an invalid vote - that counts as a no")
+        # await self.bot.say(r.content)
+
+    @commands.command(pass_context=True)
+    async def send_approve_vote(self, ctx):
+        await self._send_approve_vote(ctx)
+
+    async def _send_approve_vote(self, ctx):
+        server = ctx.message.server
+
+        for player in list(self.settings["Players"].keys()):
+            user = server.get_member(player)
+            outstring = "It's time to vote!\n"
+            outstring = outstring + "Nominees this round are:\n"
+
+            print("printing nominated")
+            for nom in self.settings["nominated"]:
+                player_name = server.get_member(nom.id).mention
+                print(player_name)
+                # outstring = outstring + server.get_member(spy).mention + "\n"
+                outstring = outstring + "-" + player_name + "\n"
+            outstring = outstring + "\n To approve, reply with `a`. To reject, reply with `r`"
+            await self.bot.send_message(user, outstring)
+
+
+    # PHASE THREE
+    #############
+
+    @commands.command(pass_context=True)
+    async def count_votes(self, ctx):
+        await self._count_votes(ctx)
+
+    async def _count_votes(self, ctx):
 
 
 def setup(bot):
