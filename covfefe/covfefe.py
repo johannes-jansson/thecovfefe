@@ -53,7 +53,7 @@ class Covfefe:
         self.settings["currentPlayer"] = 0
         self.settings["Spies"] = {}
         self.settings["Innocents"] = {}
-        self.settings["voteTrackCounter"] = 0
+        self.settings["vote_track_counter"] = 0
         self.settings["missionCounter"] = 0
         self.settings["missionResults"] = []  # append booleans
         self.settings["nominated"] = []
@@ -91,10 +91,6 @@ class Covfefe:
         await self.bot.say("Added " + user.mention + " to the game.")
 
     def _add_player(self, user: discord.Member):
-        print(user)
-        print(user.id)
-        print(user.name)
-        print(user.mention)
         self.settings["Players"][user.id] = {"Name": user.name,
                                              "Mention": user.mention}
 
@@ -118,13 +114,9 @@ class Covfefe:
         server = ctx.message.server
         user = ctx.message.author
 
-        print("Started select_spies")
         spies = []
         innocents = self.settings["Players"].copy()
-        print(innocents)
-        print(nbrOfSpies_vs_players)
         nbrOfSpies = nbrOfSpies_vs_players[str(len(innocents))]
-        print(nbrOfSpies)
         for i in range(nbrOfSpies):
             spy = random.choice(list(innocents.keys()))
             innocents.pop(spy)
@@ -142,7 +134,7 @@ class Covfefe:
 
     async def _display_scoreboard(self, ctx):
         server = ctx.message.server
-        outstring = "Scoreboard:\n"
+        outstring = "Scoreboard:\n\n"
         for i in range(self.settings["missionCounter"]):
             if self.settings["missionResults"][i]:
                 outstring = outstring + ":flag_ru:" + " "
@@ -151,7 +143,10 @@ class Covfefe:
         for i in range(self.settings["missionCounter"], 5):
             outstring = outstring + numberEmojis[missions[str(len(self.settings["Players"]))][i]] + " "
 
-        outstring = outstring + "\n\nVote track: " + str(self.settings["voteTrackCounter"]) + "/5 tries\n\n" + str(len(self.settings["Players"])) + " players, " + str(len(self.settings["Spies"])) + " spies\n\n"
+        outstring = outstring + "\n\nVote track: {}/5 tries\n\nPlayers: {}\nSpies: {}\n\n".format(
+            self.settings["vote_track_counter"],
+            len(self.settings["Players"]),
+            len(self.settings["Spies"]))
         await self.bot.say(outstring)
 
     @commands.command(pass_context=True)
@@ -168,18 +163,15 @@ class Covfefe:
                 await self.bot.say(str(players.index(player) + 1) + ". " + playerName + " <-")
             else:
                 await self.bot.say(str(players.index(player) + 1) + ". " + playerName)
+        await self.bot.say(".\n\n")
 
     @commands.command(pass_context=True)
     async def send_roles(self, ctx):
         await self._send_roles(ctx)
 
     async def _send_roles(self, ctx):
-        print("")
-        print("### send roles")
         server = ctx.message.server
         spies = list(self.settings["Spies"].keys())
-        print(spies)
-        print("Evils:")
         for id in list(self.settings["Spies"].keys()):
             # user = server.get_member("312534277524946945")
             user = server.get_member(id)
@@ -188,7 +180,6 @@ class Covfefe:
             for spy in spies:
                 outstring = outstring + server.get_member(spy).mention + "\n"
             await self.bot.send_message(user, outstring)
-        print("Innocents:")
         for id in list(self.settings["Innocents"].keys()):
             user = server.get_member(id)
             await self.bot.send_message(user, random.choice(innocentmessages))
@@ -209,10 +200,6 @@ class Covfefe:
 
     async def _nominate(self, ctx, options: str):
         server = ctx.message.server
-        print("ost")
-        print(ctx.message.author)
-        print(self.settings["playerOrder"][self.settings["currentPlayer"]])
-
         if ctx.message.author != self.settings["playerOrder"][self.settings["currentPlayer"]]:
             await self.bot.say("You're not the game leader! " + self.settings["playerOrder"][self.settings["currentPlayer"]].mention + " must nominate a squad!")
         else:
@@ -257,7 +244,6 @@ class Covfefe:
         await self.bot.send_message(user, "Suggested team is ---. Yes or no? (y/n)")
         channel = await self.bot.start_private_message(user)
         r = (await self.bot.wait_for_message(channel=channel, author=user))
-        print(r.content)
         if r.content == "y" or r.content == "yes":
             await self.bot.say("Somebody voted yes")
         elif r.content == "n" or r.content == "no":
@@ -278,24 +264,87 @@ class Covfefe:
             outstring = "It's time to vote!\n"
             outstring = outstring + "Nominees this round are:\n"
 
-            print("printing nominated")
             for nom in self.settings["nominated"]:
                 player_name = server.get_member(nom.id).mention
-                print(player_name)
                 # outstring = outstring + server.get_member(spy).mention + "\n"
                 outstring = outstring + "-" + player_name + "\n"
             outstring = outstring + "\n To approve, reply with `a`. To reject, reply with `r`"
             await self.bot.send_message(user, outstring)
-
+        await self._wait_for_votes(ctx)
 
     # PHASE THREE
     #############
-
     @commands.command(pass_context=True)
+    async def wait_for_votes(self, ctx):
+        await self._wait_for_votes(ctx)
+
+    async def _wait_for_votes(self, ctx):
+        print("entered wait for votes")
+        server = ctx.message.server
+
+        for player in list(self.settings["Players"].keys()):
+            user = server.get_member(player)
+            if player == "389116259402252288":
+                self.settings["votingresults"][user] = True
+                continue
+            print("listening for reply from:")
+            print(player)
+            print(user)
+            channel = await self.bot.start_private_message(user)
+            answer = False
+            r = (await self.bot.wait_for_message(channel=channel,
+                                                 author=user))
+            r = r.content.lower().strip()
+            print("answer")
+            print(r)
+            if r == "a":
+                answer = True
+            elif r == "r":
+                answer = False
+            else:
+                outstring = "Your message was neither `a` nor `r`, so I'll go ahead and interpret it as a rejection"
+                await self.bot.send_message(user, outstring)
+            self.settings["votingresults"][user] = answer
+            await self._count_votes(ctx)
+
     async def count_votes(self, ctx):
         await self._count_votes(ctx)
 
     async def _count_votes(self, ctx):
+        server = ctx.message.server
+        print("entered count votes")
+
+        number_of_voters = len(self.settings["votingresults"].keys())
+        approves = 0
+        playeroutstring = ""
+        for player in self.settings["votingresults"].keys():
+            playeroutstring += "- " + player.mention + " voted "
+            if self.settings["votingresults"][player]:
+                playeroutstring += "`approve`\n"
+                approves += 1
+            else:
+                playeroutstring += "`reject`\n"
+        result_outstring = "{} voted approve, {} voted reject.\n".format(approves, number_of_voters - approves)
+        self.settings["nominated"] = []
+        self.settings["votingresults"] = {}
+        if approves > number_of_voters / 2:
+            self.settings["vote_track_counter"] = 0
+            await self.bot.say("The vote passed!\n\n" + result_outstring + playeroutstring + "\n\n")
+            print("let's go to the next level")
+        else:
+            await self.bot.say("The vote failed!\n\n" + result_outstring + playeroutstring + "\n\n")
+            self.settings["vote_track_counter"] += 1
+            self.update_current_player()
+            await self._display_scoreboard(ctx)
+            await self._display_player_order(ctx)
+            await self._notify_leader(ctx)
+
+    def update_current_player(self):
+        self.settings["currentPlayer"] += 1
+        if self.settings["currentPlayer"] >= len(self.settings["Players"].keys()):
+            self.settings["currentPlayer"] = 0
+
+
 
 
 def setup(bot):
