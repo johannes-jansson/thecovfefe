@@ -53,11 +53,12 @@ class Covfefe:
         self.settings["currentPlayer"] = 0
         self.settings["Spies"] = {}
         self.settings["Innocents"] = {}
-        self.settings["vote_track_counter"] = 0
+        self.settings["vote_track_counter"] = 4
         self.settings["missionCounter"] = 0
         self.settings["missionResults"] = []  # append booleans
         self.settings["nominated"] = []
         self.settings["votingresults"] = {}
+        self.settings["successvotingresults"] = {}
 
         for player in options.replace(" ", "").split(","):
             self._add_player(server.get_member(player[2:-1]))
@@ -163,7 +164,6 @@ class Covfefe:
                 await self.bot.say(str(players.index(player) + 1) + ". " + playerName + " <-")
             else:
                 await self.bot.say(str(players.index(player) + 1) + ". " + playerName)
-        await self.bot.say(".\n\n")
 
     @commands.command(pass_context=True)
     async def send_roles(self, ctx):
@@ -230,6 +230,7 @@ class Covfefe:
         for player in players:
             playerName = server.get_member(player.id).name
             await self.bot.say(str(players.index(player) + 1) + ". " + playerName)
+        await self.bot.say("It's time to vote! You have recieved a private message with instructions")
         await self._send_approve_vote(ctx)
 
     @commands.command(pass_context=True)
@@ -333,16 +334,24 @@ class Covfefe:
             else:
                 playeroutstring += "`reject`\n"
         result_outstring = "{} voted approve, {} voted reject.\n".format(approves, number_of_voters - approves)
-        self.settings["nominated"] = []
+        # self.settings["nominated"] = []
         self.settings["votingresults"] = {}
         if approves > number_of_voters / 2:
             self.settings["vote_track_counter"] = 0
             await self.bot.say("The vote passed!\n\n" + result_outstring + playeroutstring + "\n\n")
-            print("let's go to the next level")
+            print("about to send success vote")
+            await self._send_success_vote(ctx)
         else:
             await self.bot.say("The vote failed!\n\n" + result_outstring + playeroutstring + "\n\n")
             self.settings["vote_track_counter"] += 1
             self.update_current_player()
+            if self.settings["vote_track_counter"] >= 5:
+                self.settings["vote_track_counter"] = 0
+                await self.bot.say("Too many failed votes, the americans automatically won this mission! :grimacing:")
+                self.settings["vote_track_counter"] = 0
+                self.settings["missionCounter"] += 1
+                self.settings["missionResults"].append(False)
+
             await self._display_scoreboard(ctx)
             await self._display_player_order(ctx)
             await self._notify_leader(ctx)
@@ -352,7 +361,111 @@ class Covfefe:
         if self.settings["currentPlayer"] >= len(self.settings["Players"].keys()):
             self.settings["currentPlayer"] = 0
 
+    # Phase four?
+    #############
+    @commands.command(pass_context=True)
+    async def send_success_vote(self, ctx):
+        await self._send_success_vote(ctx)
 
+    async def _send_success_vote(self, ctx):
+        print("entered send success vote")
+        server = ctx.message.server
+
+        playerstring = "People on this mission:\n"
+        for player in self.settings["nominated"]:
+            player_name = server.get_member(player.id).mention
+            playerstring += "-" + player_name + "\n"
+        await self.bot.say("It's time for the nominated players to go on their mission!\n" + playerstring)
+
+        for player in self.settings["nominated"]:
+            user = server.get_member(player.id)
+            outstring = "It's time to decide whether the mission should be successful!\n"
+
+            # outstring = outstring + "People on this mission:\n"
+            # for nom in self.settings["nominated"]:
+            #     print("hipp")
+            #     player_name = server.get_member(nom.id).mention
+            #     print("happ")
+            #     # outstring = outstring + server.get_member(spy).mention + "\n"
+            #     outstring = outstring + "-" + player_name + "\n"
+
+            outstring += playerstring
+
+
+            outstring = outstring + "\n If you want the mission to be successful, reply with `s`. If you want the mission to fail, reply with `f`"
+            if player in list(self.settings["Innocents"].keys()):
+                outstring += "\n Since you're innocent your vote will count as a `success` whatever you reply."
+            await self.bot.send_message(user, outstring)
+        await self._wait_for_success_votes(ctx)
+
+    @commands.command(pass_context=True)
+    async def wait_for_success_votes(self, ctx):
+        await self._wait_for_success_votes(ctx)
+
+    async def _wait_for_success_votes(self, ctx):
+        print("entered wait for success votes")
+        server = ctx.message.server
+
+        for player in self.settings["nominated"]:
+            user = server.get_member(player.id)
+            if player == "389116259402252288":
+                self.settings["successvotingresults"][user] = True
+                await self._check_if_success_vote_complete(ctx)
+                continue
+            print("listening for reply from:")
+            print(player)
+            print(user)
+            channel = await self.bot.start_private_message(user)
+            answer = True
+            r = (await self.bot.wait_for_message(channel=channel,
+                                                 author=user))
+            r = r.content.lower().strip()
+            print("answer")
+            print(r)
+            if r == "s":
+                answer = True
+            elif r == "f":
+                answer = False
+            else:
+                outstring = "Your message was neither `a` nor `r`, so I'll go ahead and interpret it as a success"
+                await self.bot.send_message(user, outstring)
+            self.settings["successvotingresults"][user] = answer
+            await self._check_if_success_vote_complete(ctx)
+
+    async def _check_if_success_vote_complete(self, ctx):
+        if len(self.settings["successvotingresults"].keys()) == len(self.settings["nominated"]):
+            print("everybody voted!")
+            await self._count_success_votes(ctx)
+        else:
+            print("voting not done!")
+
+    async def count_success_votes(self, ctx):
+        await self._count_success_votes(ctx)
+
+    async def _count_success_votes(self, ctx):
+        server = ctx.message.server
+        print("entered count success votes")
+
+        number_of_voters = len(self.settings["successvotingresults"].keys())
+        successes = 0
+        for player in self.settings["successvotingresults"].keys():
+            if self.settings["successvotingresults"][player]:
+                successes += 1
+        result_outstring = "{} voted success, {} voted fail.\n".format(successes, number_of_voters - successes)
+        self.settings["nominated"] = []
+        self.settings["successvotingresults"] = {}
+        self.settings["missionCounter"] += 1
+        # self.update_current_player()
+        if successes > number_of_voters / 2:
+            await self.bot.say("The mission succeded!\n\n" + result_outstring + "\n\n")
+            self.settings["missionResults"].append(True)
+        else:
+            await self.bot.say("The mission failed!\n\n" + result_outstring + "\n\n")
+            self.settings["missionResults"].append(False)
+
+        await self._display_scoreboard(ctx)
+        await self._display_player_order(ctx)
+        await self._notify_leader(ctx)
 
 
 def setup(bot):
