@@ -286,6 +286,7 @@ class Covfefe:
             user = server.get_member(player)
             if player == "389116259402252288":
                 self.settings["votingresults"][user] = True
+                await self._check_if_vote_complete(ctx)
                 continue
             print("listening for reply from:")
             print(player)
@@ -305,7 +306,14 @@ class Covfefe:
                 outstring = "Your message was neither `a` nor `r`, so I'll go ahead and interpret it as a rejection"
                 await self.bot.send_message(user, outstring)
             self.settings["votingresults"][user] = answer
+            await self._check_if_vote_complete(ctx)
+
+    async def _check_if_vote_complete(self, ctx):
+        if len(self.settings["votingresults"].keys()) == len(self.settings["Players"].keys()):
+            print("everybody voted!")
             await self._count_votes(ctx)
+        else:
+            print("voting not done!")
 
     async def count_votes(self, ctx):
         await self._count_votes(ctx)
